@@ -1,0 +1,29 @@
+{
+  "name": "Heavy_NS_Traffic",
+  "description": "Unseen Scenario with heavy North-South arrivals and link on NS approach",
+  "num_slots": 4,
+  "slot_duration_sec": 30,
+  "capacity": 6,
+  "storage": 8,
+  "weights": {
+    "overflow": 5.0,
+    "switch": 0.75
+  },
+  "link": {
+    "from_intersection": "A",
+    "to_intersection": "B",
+    "from_approach": "NS",
+    "to_approach": "NS",
+    "fraction": 0.7
+  },
+  "arrivals": {
+    "A": {
+      "NS": [7, 8, 7, 6],
+      "EW": [1, 2, 1, 1]
+    },
+    "B": {
+      "NS": [6, 7, 6, 5],
+      "EW": [2, 1, 2, 1]
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "pearson_correlation": 0.9737766422153485,
+  "surrogate_regret_percent": 0.0,
+  "qubo_optimal_schedule": "11101010",
+  "qubo_optimal_official_cost": 72.0,
+  "true_optimal_schedule": "11101010",
+  "true_optimal_cost": 72.0,
+  "max_difference": 105.11428571428573,
+  "mean_absolute_difference": 32.35312500000001
+}

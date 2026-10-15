@@ -1,0 +1,121 @@
+{
+  "offset": 161.94285714285712,
+  "matrix": [
+    [
+      -26.614285714285714,
+      14.77142857142857,
+      10.17142857142857,
+      4.571428571428571,
+      -2.057142857142857,
+      -5.142857142857142,
+      -3.4285714285714284,
+      -1.7142857142857142
+    ],
+    [
+      0.0,
+      -38.02857142857142,
+      11.457142857142857,
+      5.714285714285714,
+      -1.3714285714285714,
+      -3.4285714285714284,
+      -3.4285714285714284,
+      -1.7142857142857142
+    ],
+    [
+      0.0,
+      0.0,
+      -28.914285714285715,
+      4.714285714285714,
+      -0.6857142857142857,
+      -1.7142857142857142,
+      -1.7142857142857142,
+      -1.7142857142857142
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      -13.214285714285715,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      -8.985714285714286,
+      7.571428571428571,
+      5.7142857142857135,
+      2.8571428571428568
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      10.428571428571429,
+      5.714285714285714
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.42857142857142705,
+      4.714285714285714
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.5
+    ]
+  ],
+  "variable_names": [
+    "A_slot1",
+    "A_slot2",
+    "A_slot3",
+    "A_slot4",
+    "B_slot1",
+    "B_slot2",
+    "B_slot3",
+    "B_slot4"
+  ],
+  "variable_to_bit_mapping": {
+    "A_slot1": "x[0]",
+    "A_slot2": "x[1]",
+    "A_slot3": "x[2]",
+    "A_slot4": "x[3]",
+    "B_slot1": "x[4]",
+    "B_slot2": "x[5]",
+    "B_slot3": "x[6]",
+    "B_slot4": "x[7]"
+  },
+  "coefficient_convention": "upper_triangular: E(x) = offset + sum_i Q[i,i]*x[i] + sum_{i<j} Q[i,j]*x[i]*x[j]",
+  "auxiliary_variables": "None (Compact direct 8-variable physical formulation within 16-qubit limit)",
+  "modeling_rationale": "Constructed via scenario-independent analytical traffic dynamics: (1) Exact quadratic switching penalties: w_switch * (x_t + x_{t+1} - 2*x_t*x_{t+1}). (2) Linear vehicle delay: w_lin * q_t with w_lin = 1.0. (3) Soft quadratic queue barrier: w_quad * (q_t)^2 with w_quad = w_overflow / (2 * storage * capacity), calibrated so marginal cost at storage threshold equals w_overflow. (4) Dynamic link coupling: A-to-B transfers couple A green decisions at t-1 to B queue accumulation at t.",
+  "parameters": {
+    "scenario_name": "Reference_Scenario_R",
+    "capacity": 5,
+    "storage": 7,
+    "w_lin": 1.0,
+    "w_quad": 0.05714285714285714,
+    "w_switch": 0.5,
+    "w_overflow": 4.0,
+    "link_fraction": 0.6,
+    "link_source": "A_EW",
+    "link_target": "B_EW",
+    "tau_cap": 3
+  }
+}

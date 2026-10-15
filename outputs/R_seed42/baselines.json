@@ -1,0 +1,84 @@
+{
+  "alternating": {
+    "name": "Best Alternating Schedule",
+    "schedule": "10101010",
+    "cost": 116.0,
+    "delay": 73,
+    "overflow": 10,
+    "switches": 6,
+    "additional_info": {
+      "all_evaluated": {
+        "10101010": 116.0,
+        "10100101": 124.0,
+        "01011010": 125.0,
+        "01010101": 141.0
+      }
+    }
+  },
+  "greedy": {
+    "name": "Per-Slot Greedy Control",
+    "schedule": "01111001",
+    "cost": 92.5,
+    "delay": 67,
+    "overflow": 6,
+    "switches": 3,
+    "additional_info": {
+      "decision_rule": "Serve max(q_NS, q_EW) after arrivals, ties broken to NS"
+    }
+  },
+  "qubo_minimizer": {
+    "name": "Exact QUBO Minimizer",
+    "schedule": "11101010",
+    "cost": 72.0,
+    "delay": 66,
+    "overflow": 1,
+    "switches": 4,
+    "additional_info": {
+      "qubo_energy": 89.25714285714285,
+      "minimizer_bits": [
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0
+      ]
+    }
+  },
+  "random_expected": {
+    "name": "Uniform Random Expected",
+    "schedule": "N/A",
+    "cost": 151.25,
+    "delay": 0,
+    "overflow": 0,
+    "switches": 0,
+    "additional_info": {
+      "cost": 151.25
+    }
+  },
+  "exact_global_optimum": {
+    "name": "Exact Global Optimum",
+    "schedule": "11101010",
+    "cost": 72.0,
+    "delay": 66,
+    "overflow": 1,
+    "switches": 4,
+    "additional_info": {
+      "worst_cost": 297.0,
+      "worst_schedule": "00001111"
+    }
+  },
+  "raw_qaoa_best": {
+    "name": "Best Raw QAOA Sample",
+    "schedule": "11101010",
+    "cost": 72.0,
+    "delay": 66,
+    "overflow": 1,
+    "switches": 4,
+    "additional_info": {
+      "mean_sample_cost": 133.8173828125
+    }
+  }
+}

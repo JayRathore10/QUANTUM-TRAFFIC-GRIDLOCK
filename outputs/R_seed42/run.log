@@ -1,0 +1,33 @@
+[22:48:59] [INFO] ==================================================================
+[22:48:59] [INFO]   QUANTUM TRAFFIC GRIDLOCK — IBM QISKIT FALL FEST 2026 (QC@IITI)  
+[22:48:59] [INFO] ==================================================================
+[22:48:59] [INFO] Scenario: scenarios/R.json
+[22:48:59] [INFO] Seed: 42
+[22:48:59] [INFO] Output Directory: outputs/R_seed42
+[22:48:59] [INFO] QAOA Depth p: 3
+[22:48:59] [INFO] Scenario 'Reference_Scenario_R' loaded and validated successfully.
+[22:48:59] [INFO] Capacity: 5, Storage: 7
+[22:48:59] [INFO] Weights: overflow=4.00, switch=0.50
+[22:48:59] [INFO] Link: A (EW) -> B (EW), fraction=0.60
+[22:48:59] [INFO] Constructing scenario-independent QUBO model...
+[22:48:59] [INFO] QUBO constructed: 8 variables, offset=161.9429
+[22:48:59] [INFO] Converting QUBO to Ising Hamiltonian (x_i = (1 - Z_i)/2)...
+[22:48:59] [INFO] QUBO-Ising equivalence verified across all 256 states (max error: 1.71e-13).
+[22:48:59] [INFO] Running benchmarks and exact enumeration of all 256 schedules...
+[22:48:59] [INFO] Exact Global Optimum C*: 72.00 (schedule 11101010)
+[22:48:59] [INFO] Uniform Random Expected Cost C_rand: 151.2500
+[22:48:59] [INFO] Worst Schedule Cost: 297.00 (schedule 00001111)
+[22:48:59] [INFO] Best Alternating Schedule: 10101010 -> Cost: 116.00
+[22:48:59] [INFO] Per-Slot Greedy Schedule: 01111001 -> Cost: 92.50
+[22:48:59] [INFO] Exact QUBO Minimizer Schedule: 11101010 -> Official Cost: 72.00 (QUBO Energy: 89.26)
+[22:48:59] [INFO] Surrogate Validation: Correlation=0.9738, Regret=0.00%
+[22:48:59] [INFO] Starting QAOA training with depth p=3 (max 150 evaluations)...
+[22:49:00] [INFO] QAOA training completed in 1.34s (150 evals). Optimal Energy: 110.2595
+[22:49:00] [INFO] Optimal gammas: [0.1432, 0.327, 0.0729]
+[22:49:00] [INFO] Optimal betas:  [0.3915, 0.5656, 0.4521]
+[22:49:00] [INFO] Final quantum circuit executed for exactly 4,096 shots in 0.02s.
+[22:49:00] [INFO] Mean QAOA Sample Cost E_Q: 133.8174
+[22:49:00] [INFO] Lift (Raw): 0.2200, Lift (Clipped [0, 1]): 0.2200
+[22:49:00] [INFO] Elite Enrichment: 1.2500x (Elite shots: 260 / 4096)
+[22:49:00] [INFO] Best Sampled Schedule: 11101010 with Official Cost: 72.00 (Frequency: 13 shots)
+[22:49:00] [INFO] Hybrid Refinement Result: 11101010 with Official Cost: 72.00 (Refined from: 11101010)

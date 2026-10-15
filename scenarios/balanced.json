@@ -1,0 +1,29 @@
+{
+  "name": "Balanced_Traffic",
+  "description": "Unseen Scenario with symmetrical traffic distribution",
+  "num_slots": 4,
+  "slot_duration_sec": 30,
+  "capacity": 5,
+  "storage": 6,
+  "weights": {
+    "overflow": 3.0,
+    "switch": 1.0
+  },
+  "link": {
+    "from_intersection": "A",
+    "to_intersection": "B",
+    "from_approach": "EW",
+    "to_approach": "EW",
+    "fraction": 0.5
+  },
+  "arrivals": {
+    "A": {
+      "NS": [4, 4, 4, 4],
+      "EW": [4, 4, 4, 4]
+    },
+    "B": {
+      "NS": [3, 3, 3, 3],
+      "EW": [3, 3, 3, 3]
+    }
+  }
+}

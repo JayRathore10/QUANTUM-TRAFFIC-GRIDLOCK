@@ -1,0 +1,29 @@
+{
+  "name": "Reference_Scenario_R",
+  "description": "Public Reference Scenario R from IBM Qiskit Fall Fest 2026 - QC@IITI",
+  "num_slots": 4,
+  "slot_duration_sec": 30,
+  "capacity": 5,
+  "storage": 7,
+  "weights": {
+    "overflow": 4.0,
+    "switch": 0.5
+  },
+  "link": {
+    "from_intersection": "A",
+    "to_intersection": "B",
+    "from_approach": "EW",
+    "to_approach": "EW",
+    "fraction": 0.6
+  },
+  "arrivals": {
+    "A": {
+      "NS": [3, 6, 6, 3],
+      "EW": [5, 1, 1, 2]
+    },
+    "B": {
+      "NS": [3, 5, 4, 3],
+      "EW": [2, 6, 4, 6]
+    }
+  }
+}

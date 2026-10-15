@@ -1,0 +1,127 @@
+--- PAGE 1 ---
+QC@IITI IBM Qiskit Fall Fest 2026 Page 1 | 
+QUANTUM TRAFFIC GRIDLOCK
+ 
+Quantum Optimization for Coordinated Urban Traffic Signals | IBM Qiskit Fall Fest 2026 | QC@IITI · IIT Indore
+1. BACKGROUND
+Traffic intersections influence one another: allowing vehicles through one junction can increase queues downstream.
+Develop a quantum optimization workflow that coordinates traffic-light phases across a simplified network. The emphasis is
+on mathematical modelling, QUBO construction, QAOA implementation, and honest experimental validation—not building a
+realistic traffic simulator.
+2. CHALLENGE OBJECTIVE
+Build a scenario-independent program that accepts a traffic scenario, constructs a justified QUBO (or Ising Hamiltonian),
+runs QAOA, and returns a signal schedule and its raw sampled distribution. Hidden scenarios will test generalization. No
+QUBO coefficients, Hamiltonian, penalty weights, or optimization solution will be supplied.
+5. OFFICIAL COST & SCORER
+Minimize cost = delay + overflow_weight × overflow + switch_weight × switches. Delay sums all remaining queues after
+service across slots (vehicle-slots); overflow sums excess above nominal storage; switches count changes between
+adjacent slots at each intersection (no pre-slot-1 switch cost). The released scorer.py is the authoritative evaluator. It takes
+scenario JSON and an eight-bit schedule, but does not construct QUBO or optimize.
+3. MANDATORY TRAFFIC MODEL
+Two connected intersections, A and B, over four 30-second slots. Each intersection gives green to exactly one phase per slot: 
+1 = North–South (NS), 0 = East–West (EW). The eight decision bits are ordered A slots 1–4 followed by B slots 1–4. A quadratic surrogate
+is allowed; auxiliary variables may increase the QUBO size beyond eight.
+For each slot: (1) add external arrivals and transfers from the preceding slot; (2) the green approach serves up to its capacity;
+(3) record delay and overflow from queues remaining after service; (4) on the directed A-to-B link, transfer floor(fraction ×
+departures + 0.5) vehicles from the linked approach into B at the beginning of the next slot. Transfers after the last slot leave
+the model. Other departures leave the model. Queues start empty. Overflow is penalized, not forbidden; all 256 schedules
+are valid.
+4. PUBLIC REFERENCE SCENARIO R
+6. REQUIRED EXECUTABLE PIPELINE
+Your repository must support: python run.py --scenario <scenario.json> --seed <int> --out <dir> without manual changes.
+Verification vectors (A bits | B bits →  official cost): 1010 | 1010 →  116.0; 1111 | 1111 →  146.0; 0000 | 0000 →  237.0; 0111 | 1001 →  92.5. These are scorer checks,
+not recommended schedules.
+PARAMETER
+Link
+Capacity / storage
+Weights
+A arrivals (NS / EW)
+B arrivals (NS / EW)
+VALUE
+A →  B, EW approach, transfer fraction 0.6
+5 vehicles served per green approach per slot; nominal queue storage 7
+Overflow 4; switching 0.5
+[3, 6, 6, 3] / [5, 1, 1, 2]
+[3, 5, 4, 3] / [2, 6, 4, 6]
+--- PAGE 2 ---
+QC@IITI IBM Qiskit Fall Fest 2026 Page 2 | 
+Output
+qubo.json
+circuit.qasm
+counts.json
+schedule.json
+Required content
+QUBO matrix and offset (or Ising h, J); variable-to-schedule-bit mapping; identify auxiliary variables
+Final bound-parameter QAOA circuit in OpenQASM 3
+Exactly 4,096 raw final-circuit shots as bitstring →  count
+Decoded eight-bit schedule(s), explicitly documenting bit order
+Compare: (1) best of four alternating schedules; (2) per-slot greedy control serving the larger queue after arrivals (ties to NS); (3)
+exact enumeration of 256 schedules; (4) uniform-random expected cost; (5) the exact minimizer of your own QUBO evaluated by
+the official scorer (surrogate ceiling); (6) QAOA raw samples and optionally a separately labelled hybrid method. Report on R and
+H. Quantum advantage is not required or expected at this scale.
+Examples: three-intersection chains, minimum-green rules, time-varying arrivals, decomposition or hybrid methods, and noise
+analysis. Extensions require a precise mathematical definition and reproducible evidence; scale alone earns no credit.
+AI assistants and general-purpose libraries are permitted; declare assistance and independently verify results. Event-specific
+formulation and code must be developed during the hackathon. A QUBO produced only by enumerating all schedules, finding the
+optimum and encoding that answer is not an acceptable traffic-model derivation. Enumeration remains permitted as a benchmark.
+The submitted QUBO must arise from a documented, scenario-independent modelling rule grounded in traffic behaviour. Hard-
+coded schedules or scenario-specific lookups are prohibited. Team size: 1–4. There is no oral defence; judging uses only submitted
+code, outputs and written report.
+Hidden scenarios retain the same traffic model and eight decisions, varying arrivals (0–8), capacity (4–6), storage (5–8), overflow
+weight (2–6), switch weight (0.25–1.5), and a single A →  B link on NS or EW with fraction 0.4–0.8. Teams must not hard-code R. Hour
+0: PS, scenario R and scorer released. Hour 18: shared evaluation scenario H released. Hour 24: tagged repository, report and outputs
+for R and H submitted. After the event: judges run the same tagged code on unseen scenario S.
+Limits: at most 16 qubits; QAOA depth p ≤  4; at most 300 training objective evaluations; exactly 4,096 final shots; deterministic seed;
+CPU-only and no network during judging; at most 10 minutes per seed on an organizer-specified 8 GB reference environment. Fewer
+shots may be used during training. Classical refinement is allowed only as a separately labelled hybrid result, not as raw-QAOA
+sampling output. Judges may check the QUBO, circuit, and counts for consistency.
+For each scenario, judges enumerate all 256 schedules to compute the best official cost C* and uniform-random mean C_rand. E_Q
+is the mean official cost of the 4,096 raw QAOA samples. Lift = (C_rand − E_Q)/(C_rand − C*). Organizers exclude hidden scenarios
+where the denominator is too small.
+Elite enrichment: select exactly the 13 lowest-cost schedules, breaking ties by canonical ascending bitstring. Enrichment = (fraction of
+shots in that elite set)/(13/256); random sampling has expected enrichment 1. Robustness: report lift across at least five fixed seeds;
+judges use the minimum lift clipped to [0,1], avoiding unstable ratios. Final thresholds and seeds will be announced before the
+challenge begins. Finding a single optimum among 4,096 shots is not sufficient evidence of QAOA performance.
+11. OPTIONAL EXTENSIONS
+8. QUANTUM SAMPLING QUALITY
+7. HIDDEN SCENARIOS & TIMELINE
+10. MATHEMATICAL INTEGRITY & AI USE
+9. REQUIRE BASELINES & DIAGNOSTICS
+
+--- PAGE 3 ---
+Page 3QC@IITI IBM Qiskit Fall Fest 2026 | 
+12. DELIVERABLES
+Submit a public GitHub repository containing the runnable pipeline, instructions, and outputs for R and H; a technical report of at
+most three pages explaining modelling, QUBO derivation, QAOA design, benchmarks and limitations; and a one-page AI-use
+disclosure outside the report limit. An optional video (up to three minutes) may supplement the submission but is not scored. No
+interviews or oral presentations.
+13. EVALUATION RUBRIC (100 marks)
+Judging is entirely submission-based. Organizers will inspect the tagged code, rerun the pipeline, compare the official scores, and
+evaluate the written report. Incorrect or non-reproducible quantum results cannot earn full quantum-performance credit.
+Performance thresholds and judging hardware must be frozen and published before the event.
+Report and reproducibility
+Innovation and extensions
+Criterion
+Traffic formulation and QUBO
+Generalization and robustness
+Hidden-scenario sampling quality
+QAOA implementation and verification
+5
+20
+25
+15
+10
+Marks
+25
+Assessment
+Documented model/derivation (15); surrogate regret relative to true optimum (10),
+full at ≤ 5%, zero at ≥ 25%
+Reproducible execution (8); circuit/QUBO/count consistency (6); depth, optimizer
+and resource choices (6)
+Lift (12), elite enrichment (8), clipped worst-seed robustness (5); published
+calibrated thresholds
+Unmodified execution on H and S (9); ablations over depth, penalties and
+initialization (6)
+Relevance, mathematical justification, implementation and
+experimental evidence
+Clear derivation, setup, experiments, limitations and AI disclosure
