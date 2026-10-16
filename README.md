@@ -191,35 +191,7 @@ pytest -v
 ```
 
 ### Pytest Execution Output (16/16 Passed)
-
-```text
-==================================== test session starts ====================================
-platform win32 -- Python 3.12.5, pytest-9.1.1, pluggy-1.7.0
-rootdir: E:\QUANTUM-TRAFFIC-GRIDLOCK
-configfile: pytest.ini
-testpaths: tests
-collected 16 items
-
-tests/test_baselines_and_metrics.py::test_baselines PASSED                           [  6%]
-tests/test_baselines_and_metrics.py::test_metrics_computation PASSED                 [ 12%]
-tests/test_cli.py::test_cli_execution PASSED                                         [ 18%]
-tests/test_generalization.py::test_unseen_scenarios_pipeline[scenarios/heavy_ns.json] PASSED [ 25%]
-tests/test_generalization.py::test_unseen_scenarios_pipeline[scenarios/balanced.json] PASSED [ 31%]
-tests/test_qaoa_solver.py::test_qiskit_endianness_decoding PASSED                    [ 37%]
-tests/test_qaoa_solver.py::test_qaoa_execution_and_constraints PASSED                [ 43%]
-tests/test_qubo_and_ising.py::test_qubo_structure PASSED                             [ 50%]
-tests/test_qubo_and_ising.py::test_qubo_ising_equivalence_all_states PASSED          [ 56%]
-tests/test_qubo_and_ising.py::test_qubo_regret_scenario_r PASSED                     [ 62%]
-tests/test_scenario.py::test_valid_scenario_parsing PASSED                           [ 68%]
-tests/test_scenario.py::test_scenario_validation_errors PASSED                       [ 75%]
-tests/test_traffic_model.py::test_four_official_reference_vectors PASSED             [ 81%]
-tests/test_traffic_model.py::test_schedule_bit_parsing PASSED                        [ 87%]
-tests/test_traffic_model.py::test_switching_cost_exactness PASSED                    [ 93%]
-tests/test_traffic_model.py::test_overflow_and_transfer_dynamics PASSED              [100%]
-
-=================================== 16 passed in 20.01s ====================================
-```
-
+![Alt text](assets/screenshots/image.png)
 ---
 
 ## 7. Performance & Resource Compliance
