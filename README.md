@@ -1,5 +1,7 @@
 # Quantum Traffic Gridlock — IBM Qiskit Fall Fest 2026 (QC@IITI)
 
+🔗 **GitHub Repository**: [https://github.com/JayRathore10/QUANTUM-TRAFFIC-GRIDLOCK](https://github.com/JayRathore10/QUANTUM-TRAFFIC-GRIDLOCK)
+
 A complete, scientifically grounded, reproducible quantum optimization solution for coordinating multi-intersection urban traffic signals using **QUBO** and **QAOA** (Quantum Approximate Optimization Algorithm) on Qiskit.
 
 ## Deliverables & Documentation
