@@ -1,42 +1,42 @@
 [
   {
     "seed": 42,
-    "e_q": 133.8173828125,
-    "lift": 0.21996993296529968,
-    "lift_clipped": 0.21996993296529968,
-    "elite_enrichment": 1.25,
-    "elite_shots": 260
+    "e_q": 137.0223388671875,
+    "lift": 0.17952884710173503,
+    "lift_clipped": 0.17952884710173503,
+    "elite_enrichment": 1.125,
+    "elite_shots": 234
   },
   {
     "seed": 43,
-    "e_q": 149.97998046875,
-    "lift": 0.016025483044164037,
-    "lift_clipped": 0.016025483044164037,
-    "elite_enrichment": 0.5096153846153846,
-    "elite_shots": 106
+    "e_q": 145.3016357421875,
+    "lift": 0.07505822407334385,
+    "lift_clipped": 0.07505822407334385,
+    "elite_enrichment": 1.125,
+    "elite_shots": 234
   },
   {
     "seed": 44,
-    "e_q": 131.4349365234375,
-    "lift": 0.25003234670741326,
-    "lift_clipped": 0.25003234670741326,
-    "elite_enrichment": 1.3413461538461537,
-    "elite_shots": 279
+    "e_q": 133.2650146484375,
+    "lift": 0.22693987825315456,
+    "lift_clipped": 0.22693987825315456,
+    "elite_enrichment": 1.375,
+    "elite_shots": 286
   },
   {
     "seed": 45,
-    "e_q": 117.676513671875,
-    "lift": 0.423640206033123,
-    "lift_clipped": 0.423640206033123,
-    "elite_enrichment": 3.3125,
-    "elite_shots": 689
+    "e_q": 132.855712890625,
+    "lift": 0.23210456920347003,
+    "lift_clipped": 0.23210456920347003,
+    "elite_enrichment": 0.9951923076923077,
+    "elite_shots": 207
   },
   {
     "seed": 46,
-    "e_q": 148.246337890625,
-    "lift": 0.03790109917192429,
-    "lift_clipped": 0.03790109917192429,
-    "elite_enrichment": 0.7355769230769231,
-    "elite_shots": 153
+    "e_q": 146.580078125,
+    "lift": 0.05892645899053628,
+    "lift_clipped": 0.05892645899053628,
+    "elite_enrichment": 0.875,
+    "elite_shots": 182
   }
 ]

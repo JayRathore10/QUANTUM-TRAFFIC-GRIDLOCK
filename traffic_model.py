@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from typing import Dict, List, Sequence, Tuple, Union
-
+from decimal import Decimal, ROUND_HALF_UP
 from scenario import Scenario
 
 
@@ -50,6 +50,11 @@ class TrafficCostBreakdown:
             "switches_B": self.switches_B,
         }
 
+
+def round_transfer_half_up(fraction: float, departures: int) -> int:
+    """Exact decimal half-up rounding matching official scorer.py: floor(fraction * departures + 0.5)."""
+    amount = Decimal(str(fraction)) * Decimal(departures)
+    return int(amount.quantize(Decimal("1"), rounding=ROUND_HALF_UP))
 
 def parse_schedule_bits(schedule: Union[str, Sequence[int]]) -> Tuple[int, ...]:
     """Parse and validate an 8-bit schedule into a tuple of 8 integers (0 or 1).
@@ -152,8 +157,11 @@ def simulate_traffic(scenario: Scenario, schedule: Union[str, Sequence[int]]) ->
 
         # 4. Compute transfer for next slot: floor(fraction * departures + 0.5)
         link_dep = dep_A_EW if src_app == "EW" else dep_A_NS
-        out_trans = int(math.floor(frac * link_dep + 0.5))
-        pending_transfer = out_trans
+        out_trans = round_transfer_half_up(frac, link_dep)
+        
+        # Transfers after the final slot leave the model. 
+        # We record the raw out_trans for the snapshot, but discard it from pending.
+        pending_transfer = out_trans if t < scenario.num_slots - 1 else 0
 
         snapshots.append(
             SlotSnapshot(

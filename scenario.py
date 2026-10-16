@@ -34,11 +34,18 @@ class Scenario:
             "slot_duration_sec": self.slot_duration_sec,
             "capacity": self.capacity,
             "storage": self.storage,
+            "service_capacity": self.capacity,
+            "storage_capacity": self.storage,
+            "overflow_weight": self.w_overflow,
+            "switch_weight": self.w_switch,
             "weights": {
                 "overflow": self.w_overflow,
                 "switch": self.w_switch,
             },
             "link": {
+                "from": self.link_from_intersection,
+                "to": self.link_to_intersection,
+                "phase": self.link_from_approach,
                 "from_intersection": self.link_from_intersection,
                 "to_intersection": self.link_to_intersection,
                 "from_approach": self.link_from_approach,
@@ -57,12 +64,38 @@ class Scenario:
             },
         }
 
+    def to_official_scorer_dict(self) -> Dict[str, Any]:
+        """Return the exact dict format required by the official scorer.py."""
+        return {
+            "name": self.name,
+            "arrivals": {
+                "A": {
+                    "NS": list(self.arrivals["A"]["NS"]),
+                    "EW": list(self.arrivals["A"]["EW"]),
+                },
+                "B": {
+                    "NS": list(self.arrivals["B"]["NS"]),
+                    "EW": list(self.arrivals["B"]["EW"]),
+                },
+            },
+            "service_capacity": int(self.capacity),
+            "storage_capacity": int(self.storage),
+            "overflow_weight": self.w_overflow,
+            "switch_weight": self.w_switch,
+            "link": {
+                "from": self.link_from_intersection,
+                "to": self.link_to_intersection,
+                "phase": self.link_from_approach,
+                "fraction": self.link_fraction,
+            },
+        }
+
 
 def parse_scenario(data: Union[Dict[str, Any], str, Path]) -> Scenario:
     """Parse scenario data from a dictionary, JSON string, or file path.
 
-    Supports diverse JSON schemas (nested dicts, flat keys, varied naming conventions)
-    to ensure seamless compatibility with unseen organizer scenarios.
+    Supports both the official scorer schema (service_capacity, storage_capacity,
+    overflow_weight, switch_weight, link.from/to/phase/fraction) and extended schemas.
     """
     if isinstance(data, (str, Path)):
         path = Path(data)
@@ -80,36 +113,72 @@ def parse_scenario(data: Union[Dict[str, Any], str, Path]) -> Scenario:
     num_slots = int(raw.get("num_slots", 4))
     slot_duration_sec = int(raw.get("slot_duration_sec", 30))
 
-    # Capacity
-    cap_val = raw.get("capacity", raw.get("service_capacity", raw.get("cap", 5)))
+    # Capacity (supports official 'service_capacity' and 'capacity')
+    cap_val = raw.get("service_capacity", raw.get("capacity", raw.get("cap", 5)))
     capacity = int(cap_val)
     if capacity <= 0:
         raise ValueError(f"Capacity must be positive, got {capacity}")
 
-    # Storage
-    storage_val = raw.get("storage", raw.get("nominal_storage", raw.get("queue_storage", 7)))
+    # Storage (supports official 'storage_capacity' and 'storage')
+    storage_val = raw.get(
+        "storage_capacity",
+        raw.get("storage", raw.get("nominal_storage", raw.get("queue_storage", 7))),
+    )
     storage = int(storage_val)
-    if storage <= 0:
-        raise ValueError(f"Storage must be positive, got {storage}")
+    if storage < 0:
+        raise ValueError(f"Storage must be non-negative, got {storage}")
 
     # Weights
     weights_dict = raw.get("weights", {})
-    w_overflow = float(weights_dict.get("overflow", raw.get("overflow_weight", raw.get("w_overflow", 4.0))))
-    w_switch = float(weights_dict.get("switch", raw.get("switch_weight", raw.get("switching_weight", raw.get("w_switch", 0.5)))))
+    w_overflow = float(
+        weights_dict.get("overflow", raw.get("overflow_weight", raw.get("w_overflow", 4.0)))
+    )
+    w_switch = float(
+        weights_dict.get(
+            "switch",
+            raw.get("switch_weight", raw.get("switching_weight", raw.get("w_switch", 0.5))),
+        )
+    )
     if w_overflow < 0:
         raise ValueError(f"Overflow weight must be non-negative, got {w_overflow}")
     if w_switch < 0:
         raise ValueError(f"Switch weight must be non-negative, got {w_switch}")
 
-    # Link configuration
+    # Link configuration (supports official 'from', 'to', 'phase', 'fraction')
     link_info = raw.get("link", {})
-    from_inter = str(link_info.get("from_intersection", raw.get("link_from", "A"))).upper()
-    to_inter = str(link_info.get("to_intersection", raw.get("link_to", "B"))).upper()
+    from_inter = str(
+        link_info.get("from", link_info.get("from_intersection", raw.get("link_from", "A")))
+    ).upper()
+    to_inter = str(
+        link_info.get("to", link_info.get("to_intersection", raw.get("link_to", "B")))
+    ).upper()
+    from_app = str(
+        link_info.get(
+            "phase",
+            link_info.get(
+                "from_approach",
+                raw.get("link_phase", raw.get("link_approach", raw.get("link_from_approach", "EW"))),
+            ),
+        )
+    ).upper()
+    to_app = str(
+        link_info.get(
+            "to_phase",
+            link_info.get(
+                "to_approach",
+                link_info.get(
+                    "phase",
+                    raw.get("link_target_approach", raw.get("link_to_approach", from_app)),
+                ),
+            ),
+        )
+    ).upper()
+    fraction = float(
+        link_info.get("fraction", raw.get("transfer_fraction", raw.get("fraction", 0.6)))
+    )
 
-    from_app = str(link_info.get("from_approach", raw.get("link_approach", raw.get("link_from_approach", "EW")))).upper()
-    to_app = str(link_info.get("to_approach", raw.get("link_target_approach", raw.get("link_to_approach", from_app)))).upper()
-    fraction = float(link_info.get("fraction", raw.get("transfer_fraction", raw.get("fraction", 0.6))))
-
+    if from_inter != "A" or to_inter != "B":
+        raise ValueError(f"Expected directed A->B link, got {from_inter}->{to_inter}")
     if from_app not in {"NS", "EW"}:
         raise ValueError(f"Source link approach must be 'NS' or 'EW', got '{from_app}'")
     if to_app not in {"NS", "EW"}:
@@ -129,7 +198,6 @@ def parse_scenario(data: Union[Dict[str, Any], str, Path]) -> Scenario:
                     raise KeyError(f"Missing arrival data for {inter} {app}")
                 arrivals[inter][app] = [int(v) for v in seq]
     else:
-        # Check flat keys like arrivals_A_NS or A_NS_arrivals
         for inter in ["A", "B"]:
             for app in ["NS", "EW"]:
                 candidates = [
@@ -151,14 +219,11 @@ def parse_scenario(data: Union[Dict[str, Any], str, Path]) -> Scenario:
                 else:
                     raise KeyError(f"Could not locate arrivals for intersection {inter}, approach {app}")
 
-    # Validate arrivals lengths and values
     for inter in ["A", "B"]:
         for app in ["NS", "EW"]:
             seq = arrivals[inter][app]
             if len(seq) != num_slots:
-                raise ValueError(
-                    f"Expected {num_slots} arrivals for {inter} {app}, got {len(seq)}: {seq}"
-                )
+                raise ValueError(f"Expected {num_slots} arrivals for {inter} {app}, got {len(seq)}: {seq}")
             for v in seq:
                 if v < 0:
                     raise ValueError(f"Arrival count cannot be negative: {v} in {inter} {app}")

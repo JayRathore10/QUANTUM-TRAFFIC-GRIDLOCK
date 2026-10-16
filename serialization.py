@@ -61,6 +61,13 @@ def save_experiment_outputs(
     best_sampled_eval = simulate_traffic(scenario, best_sampled_sched)
 
     schedule_data = {
+        "bits": best_sampled_sched,
+        "A": [int(c) for c in best_sampled_sched[:4]],
+        "B": [int(c) for c in best_sampled_sched[4:]],
+        "schedule_bit_order": [
+            "A_slot1", "A_slot2", "A_slot3", "A_slot4",
+            "B_slot1", "B_slot2", "B_slot3", "B_slot4",
+        ], 
         "schedule_bit_order": [
             "A_slot1",
             "A_slot2",

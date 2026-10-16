@@ -1,11 +1,11 @@
 {
   "optimal_cost_c_star": 72.0,
   "uniform_random_c_rand": 151.25,
-  "mean_qaoa_cost_e_q": 133.8173828125,
-  "raw_lift": 0.21996993296529968,
-  "lift_clipped_0_1": 0.21996993296529968,
-  "elite_enrichment_factor": 1.25,
-  "elite_shots_count": 260,
+  "mean_qaoa_cost_e_q": 137.0223388671875,
+  "raw_lift": 0.17952884710173503,
+  "lift_clipped_0_1": 0.17952884710173503,
+  "elite_enrichment_factor": 1.125,
+  "elite_shots_count": 234,
   "total_shots": 4096,
   "elite_set_size": 13
 }

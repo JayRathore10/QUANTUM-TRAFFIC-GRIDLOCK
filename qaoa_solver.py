@@ -96,21 +96,21 @@ def decode_qiskit_bitstring(raw_bitstring: str) -> str:
     """
     return raw_bitstring[::-1]
 
-
 def solve_qaoa(
     qubo: QUBOResult,
     ising: IsingHamiltonian,
     p: int = 3,
-    max_evaluations: int = 150,
+    max_evaluations: int = 270,
     seed: int = 42,
     final_shots: int = 4096,
+    init_strategy: str = "multistart",
 ) -> QAOAResult:
     """Train QAOA circuit parameters and sample final measurement distribution.
 
     Enforces challenge constraints:
       - p <= 4
-      - <= 300 evaluations
-      - <= 16 qubits (here exactly 8 qubits)
+      - <= 300 evaluations total across all starts
+      - <= 16 qubits (here 8 qubits)
       - Exactly 4096 final shots
       - Deterministic seed
     """
@@ -121,37 +121,40 @@ def solve_qaoa(
 
     n = ising.num_qubits
 
-    # Precalculate diagonal Ising energies for all 256 computational basis states
-    # Statevector index state_int: qubit k is bit (state_int >> k) & 1.
     energy_diag = np.zeros(1 << n, dtype=float)
     for state_int in range(1 << n):
-        # Schedule bit k corresponds to qubit k
         x = [(state_int >> k) & 1 for k in range(n)]
         energy_diag[state_int] = qubo.evaluate(x)
 
-    # Parametric circuit for fast statevector simulation
     qc_param, gamma_vec, beta_vec = build_parameterized_qaoa_circuit(ising, p)
 
-    training_history: List[Dict[str, float]] = []
+    training_history: List[Dict[str, Any]] = []
     eval_count = 0
+    best_eval_energy = float("inf")
+    best_eval_params: Optional[np.ndarray] = None
 
     def objective(params: np.ndarray) -> float:
-        nonlocal eval_count
+        nonlocal eval_count, best_eval_energy, best_eval_params
+        if eval_count >= max_evaluations:
+            return best_eval_energy
         eval_count += 1
         gammas = params[:p]
         betas = params[p:]
 
-        # Assign parameters
         param_dict = {}
         for layer in range(p):
-            param_dict[gamma_vec[layer]] = gammas[layer]
-            param_dict[beta_vec[layer]] = betas[layer]
+            param_dict[gamma_vec[layer]] = float(gammas[layer])
+            param_dict[beta_vec[layer]] = float(betas[layer])
 
         bound_circuit = qc_param.assign_parameters(param_dict)
         sv = Statevector.from_instruction(bound_circuit)
         probs = sv.probabilities()
-
         expected_energy = float(np.dot(probs, energy_diag))
+
+        if expected_energy < best_eval_energy:
+            best_eval_energy = expected_energy
+            best_eval_params = params.copy()
+
         training_history.append(
             {
                 "eval": eval_count,
@@ -161,43 +164,67 @@ def solve_qaoa(
         )
         return expected_energy
 
-    # Deterministic parameter initialization
     rng = np.random.default_rng(seed)
-    # Standard linear ramp schedule for initial angles
-    init_gammas = [0.05 * (i + 1) for i in range(p)]
-    init_betas = [0.4 * (1.0 - i / (p + 1)) for i in range(p)]
-    init_params = np.array(init_gammas + init_betas, dtype=float)
-    # Add minor deterministic perturbation from seed
-    init_params += 0.01 * (rng.random(2 * p) - 0.5)
+    max_h = float(np.max(np.abs(ising.h))) if len(ising.h) > 0 else 1.0
+    max_j = float(np.max(np.abs(ising.J))) if ising.J.size > 0 else 1.0
+    h_scale = max(1.0, 0.5 * (max_h + max_j))
+
+    # Construct deterministic starting points
+    starts: List[Tuple[np.ndarray, float]] = []
+    # Start 1: Standard linear ramp
+    g1 = [0.05 * (i + 1) for i in range(p)]
+    b1 = [0.40 * (1.0 - i / (p + 1)) for i in range(p)]
+    p1 = np.array(g1 + b1, dtype=float) + 0.01 * (rng.random(2 * p) - 0.5)
+    starts.append((p1, 0.20))
+
+    if init_strategy == "multistart" and max_evaluations >= 120:
+        # Start 2: Spectral-normalized adiabatic ramp
+        g2 = [(0.6 / h_scale) * ((i + 0.5) / p) for i in range(p)]
+        b2 = [0.55 * (1.0 - (i + 0.5) / p) for i in range(p)]
+        p2 = np.array(g2 + b2, dtype=float) + 0.02 * (rng.random(2 * p) - 0.5)
+        starts.append((p2, 0.15))
+
+        # Start 3: Seeded harmonic ramp for local-minimum escape
+        g3 = [(0.9 / h_scale) * ((i + 1) / (p + 1)) for i in range(p)]
+        b3 = [0.35 * (1.0 - 0.5 * (i / max(1, p - 1))) for i in range(p)]
+        p3 = np.array(g3 + b3, dtype=float) + 0.08 * (rng.random(2 * p) - 0.5)
+        starts.append((p3, 0.25))
+    elif init_strategy == "spectral":
+        g2 = [(0.6 / h_scale) * ((i + 0.5) / p) for i in range(p)]
+        b2 = [0.55 * (1.0 - (i + 0.5) / p) for i in range(p)]
+        starts = [(np.array(g2 + b2, dtype=float), 0.15)]
+    elif init_strategy == "random":
+        starts = [(rng.uniform(0.01, 0.5, size=2 * p), 0.20)]
 
     start_train = time.perf_counter()
-    res = minimize(
-        objective,
-        init_params,
-        method="COBYLA",
-        options={"maxiter": max_evaluations, "rhobeg": 0.2},
-    )
+    per_start_budget = max_evaluations // len(starts)
+    for idx, (init_p, rhobeg) in enumerate(starts):
+        rem = max_evaluations - eval_count
+        if rem <= 0:
+            break
+        budget = rem if idx == len(starts) - 1 else min(per_start_budget, rem)
+        minimize(
+            objective,
+            init_p,
+            method="COBYLA",
+            options={"maxiter": budget, "rhobeg": rhobeg},
+        )
     train_time = time.perf_counter() - start_train
 
-    optimal_params = res.x
-    opt_gammas = optimal_params[:p].tolist()
-    opt_betas = optimal_params[p:].tolist()
+    assert best_eval_params is not None
+    opt_gammas = best_eval_params[:p].tolist()
+    opt_betas = best_eval_params[p:].tolist()
 
-    # Construct and bind final circuit
     final_dict = {}
     for layer in range(p):
         final_dict[gamma_vec[layer]] = opt_gammas[layer]
         final_dict[beta_vec[layer]] = opt_betas[layer]
 
     bound_final_qc = qc_param.assign_parameters(final_dict)
-
-    # Export to OpenQASM 3 before adding measurements
-    # (Or add measurements and export - both are valid, standard includes measurements)
     bound_final_qc_measured = bound_final_qc.copy()
     bound_final_qc_measured.measure_all()
     qasm3_str = qasm3.dumps(bound_final_qc_measured)
 
-    # Execute final 4096 shots on AerSimulator
     start_sampling = time.perf_counter()
     simulator = AerSimulator(seed_simulator=seed)
     job = simulator.run(bound_final_qc_measured, shots=final_shots)
@@ -205,12 +232,10 @@ def solve_qaoa(
     raw_counts = sim_result.get_counts()
     sample_time = time.perf_counter() - start_sampling
 
-    # Verify shot count
     total_shots = sum(raw_counts.values())
     if total_shots != final_shots:
         raise RuntimeError(f"Expected {final_shots} shots, obtained {total_shots}")
 
-    # Decode counts into canonical schedule ordering
     decoded_counts: Dict[str, int] = {}
     for raw_bitstr, count in raw_counts.items():
         sched_bitstr = decode_qiskit_bitstring(raw_bitstr)
@@ -219,7 +244,7 @@ def solve_qaoa(
     return QAOAResult(
         optimal_gammas=opt_gammas,
         optimal_betas=opt_betas,
-        best_energy=float(res.fun),
+        best_energy=float(best_eval_energy),
         num_evaluations=eval_count,
         training_time_sec=train_time,
         sampling_time_sec=sample_time,
