@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict
+from typing import Dict
 
 from baselines import BaselineResult
 from metrics import SamplingQualityMetrics, SurrogateValidationMetrics
@@ -64,10 +64,6 @@ def save_experiment_outputs(
         "bits": best_sampled_sched,
         "A": [int(c) for c in best_sampled_sched[:4]],
         "B": [int(c) for c in best_sampled_sched[4:]],
-        "schedule_bit_order": [
-            "A_slot1", "A_slot2", "A_slot3", "A_slot4",
-            "B_slot1", "B_slot2", "B_slot3", "B_slot4",
-        ], 
         "schedule_bit_order": [
             "A_slot1",
             "A_slot2",
